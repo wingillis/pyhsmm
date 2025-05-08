@@ -1,5 +1,3 @@
-from __future__ import division
-from builtins import range, map
 import numpy as np
 from numpy import newaxis as na
 from scipy.special import logsumexp

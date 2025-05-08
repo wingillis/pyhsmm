@@ -8,3 +8,6 @@
 *.o
 deps/
 tests/figures
+.venv/
+
+*.egg-info

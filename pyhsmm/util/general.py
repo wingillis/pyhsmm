@@ -1,14 +1,12 @@
-from __future__ import division
-from builtins import range, zip, filter
-
 import numpy as np
 from numpy.lib.stride_tricks import as_strided as ast
 import scipy.linalg
 import copy, collections, os, shutil, hashlib
 from contextlib import closing
-from six.moves.urllib.request import urlopen
 from itertools import chain, count
 from functools import reduce
+from urllib.request import urlopen
+
 
 def solve_psd(A,b,chol=None,overwrite_b=False,overwrite_A=False):
     if A.shape[0] < 5000 and chol is None:
