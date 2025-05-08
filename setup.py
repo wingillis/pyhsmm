@@ -30,12 +30,10 @@ download_eigen()
 extensions = []
 
 for file in Path('pyhsmm').glob('**/*.pyx'):
-    print(file)
-    print(str(file.with_suffix('')).replace('/', '.'))
     extensions.append(
         Extension(
             str(file.with_suffix('')).replace('/', '.'),
-            sources=[file.with_suffix('.cpp')],
+            sources=[file],
             include_dirs=['deps', np.get_include()],
             extra_compile_args=['-O3','-std=c++11','-DNDEBUG','-w','-DHMM_TEMPS_ON_HEAP'])
     )
