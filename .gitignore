@@ -6,8 +6,13 @@
 /build
 *.so
 *.o
-deps/
 tests/figures
 .venv/
 
 *.egg-info
+build/
+dist/
+*.egg-info/
+uv.lock
+deps/Eigen.tar.gz
+deps/eigen-*/

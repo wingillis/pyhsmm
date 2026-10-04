@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel", "numpy>=2.2.5", "requests", "Cython>=3"]
+requires = ["setuptools>=77.0", "wheel", "numpy>=2.2", "Cython>=3.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,12 +11,15 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
-    "Programming Language :: C++"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: C++",
 ]
 keywords = [
     "bayesian",
@@ -29,11 +32,10 @@ keywords = [
     "vb"
 ]
 dependencies = [
-    "matplotlib>=3.10.3",
-    "numpy>=2.2.5",
-    "pybasicbayes @ https://github.com/wingillis/pybasicbayes/raw/refs/heads/update-python/dist/pybasicbayes-0.3.0-cp311-cp311-linux_x86_64.whl ; python_version == '3.11' and sys_platform == 'linux'",
-    "pybasicbayes @ https://github.com/wingillis/pybasicbayes/raw/refs/heads/update-python/dist/pybasicbayes-0.3.0-cp312-cp312-linux_x86_64.whl ; python_version == '3.12' and sys_platform == 'linux'",
-    "scipy>=1.15.3",
+    "matplotlib>=3.10",
+    "numpy>=2.2",
+    "pybasicbayes",
+    "scipy>=1.15",
 ]
 
 [project.urls]
@@ -42,8 +44,17 @@ Repository = "https://github.com/mattjj/pyhsmm.git"
 
 [project.optional-dependencies]
 dev = [
-    "build>=1.2.2.post1",
+    "build>=1.2.2",
+    "pytest>=8.0",
 ]
 
 [tool.setuptools]
-packages = ["pyhsmm"] 
+packages = [
+    "pyhsmm",
+    "pyhsmm.basic",
+    "pyhsmm.internals",
+    "pyhsmm.util",
+]
+
+[tool.setuptools.package-data]
+pyhsmm = ["internals/*.h", "util/*.pyx"]

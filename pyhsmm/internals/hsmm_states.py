@@ -1093,8 +1093,8 @@ def hsmm_maximizing_assignment(
     dur_potentials, dur_survival_potentials,
     left_censoring=False, right_censoring=True):
 
-    beta_scores, beta_args = np.empty((T,N)), np.empty((T,N),dtype=np.int)
-    betastar_scores, betastar_args = np.empty((T,N)), np.empty((T,N),dtype=np.int)
+    beta_scores, beta_args = np.empty((T,N)), np.empty((T,N),dtype=int)
+    betastar_scores, betastar_args = np.empty((T,N)), np.empty((T,N),dtype=int)
 
     beta_scores[-1] = 0.
     for t in range(T-1,-1,-1):
