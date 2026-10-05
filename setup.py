@@ -8,7 +8,10 @@ from warnings import warn
 import os
 import sys
 from glob import glob
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 import tarfile
 import shutil
 
