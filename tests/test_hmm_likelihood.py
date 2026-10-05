@@ -1,8 +1,5 @@
-from __future__ import division
-from builtins import range
 import numpy as np
 from numpy import newaxis as na
-from inspect import getargspec
 from functools import wraps
 import itertools
 from nose.plugins.attrib import attr

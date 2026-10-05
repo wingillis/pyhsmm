@@ -1,5 +1,3 @@
-from __future__ import division
-from builtins import range
 import numpy as np
 np.seterr(divide='ignore') # these warnings are usually harmless for this code
 np.random.seed(0)

@@ -1,0 +1,15 @@
+# Vendored Eigen headers
+
+This directory contains the header-only Eigen linear algebra library,
+version 3.3.7, vendored so the package builds without network access.
+
+- Upstream: https://gitlab.com/libeigen/eigen
+- Source archive: eigen-3.3.7.tar.gz
+- SHA256: d56fbad95abf993f8af608484729e3d87ef611dd85b3380a8bad1d5cbc373a57
+
+Only the `Eigen/` include directory (and its license files) are kept; the
+rest of the upstream archive (tests, demos, docs, unsupported modules) is
+not needed to build pyhsmm.
+
+If you need a different Eigen version, delete `deps/Eigen` and place the
+extracted `Eigen` include directory here.
