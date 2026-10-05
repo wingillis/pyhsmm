@@ -79,7 +79,7 @@ if not os.path.exists(eigenpath):
     try:
         r = requests.get(eigenurl)
         content = r.content
-    except (ImportError, NameError):
+    except (ImportError, NameError, AttributeError):
         import urllib.request
         content = urllib.request.urlopen(eigenurl).read()
     with open(eigentarpath, 'wb') as f:
