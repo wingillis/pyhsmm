@@ -73,9 +73,14 @@ eigentarpath = os.path.join('deps', 'Eigen.tar.gz')
 eigenpath = os.path.join('deps', 'Eigen')
 if not os.path.exists(eigenpath):
     print('Downloading Eigen...')
-    r = requests.get(eigenurl)
+    try:
+        r = requests.get(eigenurl)
+        content = r.content
+    except (ImportError, NameError):
+        import urllib.request
+        content = urllib.request.urlopen(eigenurl).read()
     with open(eigentarpath, 'wb') as f:
-        f.write(r.content)
+        f.write(content)
     with tarfile.open(eigentarpath, 'r') as tar:
         tar.extractall('deps')
     thedir = glob(os.path.join('deps', 'eigen-*'))[0]
