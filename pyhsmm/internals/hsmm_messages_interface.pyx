@@ -60,7 +60,7 @@ def sample_forwards_log(
     if floating is double:
         randseq = np.random.random(size=2*caBl.shape[0]).astype(np.double)
     else:
-        randseq = np.random.random(size=2*caBl.shape[0]).astype(np.float)
+        randseq = np.random.random(size=2*caBl.shape[0])
 
     ref.sample_forwards_log(A.shape[0],caBl.shape[0],&A[0,0],&pi0[0],
             &caBl[0,0],&aDl[0,0],&betal[0,0],&betastarl[0,0],&stateseq[0],&randseq[0])
@@ -116,8 +116,8 @@ def resample_log_multiple(
         randseq = np.random.random(size=2*np.sum(Ts)).astype(np.double)
         loglikes = np.empty(num,dtype=np.double)
     else:
-        randseq = np.random.random(size=2*np.sum(Ts)).astype(np.float)
-        loglikes = np.empty(num,dtype=np.float)
+        randseq = np.random.random(size=2*np.sum(Ts))
+        loglikes = np.empty(num,dtype=float)
 
     with nogil:
         for i in prange(num):

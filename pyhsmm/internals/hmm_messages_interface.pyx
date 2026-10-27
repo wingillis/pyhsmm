@@ -88,7 +88,7 @@ def sample_forwards_log(
     if floating is double:
         randseq = np.random.random(size=aBl.shape[0]).astype(np.double)
     else:
-        randseq = np.random.random(size=aBl.shape[0]).astype(np.float)
+        randseq = np.random.random(size=aBl.shape[0])
 
     ref.sample_forwards_log(
             hetero, A.shape[1], aBl.shape[0], &_A[0,0,0], &pi0[0], &aBl[0,0],
@@ -154,7 +154,7 @@ def sample_backwards_normalized(
     if floating is double:
         randseq = np.random.random(size=alphan.shape[0]).astype(np.double)
     else:
-        randseq = np.random.random(size=alphan.shape[0]).astype(np.float)
+        randseq = np.random.random(size=alphan.shape[0])
 
     ref.sample_backwards_normalized(
         hetero, AT.shape[1], alphan.shape[0], &_AT[0,0,0],

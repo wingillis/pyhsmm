@@ -217,3 +217,16 @@ the style, see [pybasicbayes](https://github.com/mattjj/pybasicbayes).
 
 [Matt Johnson](https://github.com/mattjj), [Alex Wiltschko](https://github.com/alexbw), [Yarden Katz](https://github.com/yarden), [Chia-ying (Jackie) Lee](https://github.com/jacquelineCelia), [Scott Linderman](https://github.com/slinderman), [Kevin Squire](https://github.com/kmsquire), [Nick Foti](https://github.com/nfoti).
 
+
+## Legacy Python 3.7 support
+
+This version requires Python >= 3.12. The final Python 3.7-compatible state
+of this repository is preserved on the `py37-legacy` branch (and the
+`py37-final` tag):
+
+```bash
+pip install "git+https://github.com/wingillis/pyhsmm.git@py37-legacy"
+```
+
+The legacy branch is frozen (no new features); the modern branch is the
+supported going forward.

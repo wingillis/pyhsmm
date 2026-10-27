@@ -1,125 +1,71 @@
-from __future__ import print_function
-from setuptools import setup, Extension
-from setuptools.command.build_ext import build_ext as _build_ext
-from setuptools.command.sdist import sdist as _sdist
-from distutils.command.clean import clean as _clean
-from distutils.errors import CompileError
-from warnings import warn
-import os
-import sys
-from glob import glob
-import requests
-import tarfile
-import shutil
+import numpy as np
+import setuptools
+from setuptools.extension import Extension
+from Cython.Build import cythonize
+from pathlib import Path
 
-from future.standard_library import install_aliases
-install_aliases()
+# Eigen headers are vendored in deps/Eigen (see deps/README.mkd). If they
+# are missing, fall back to downloading the pinned 3.3.7 archive.
+EIGEN_VERSION = "3.3.7"
+EIGEN_SHA256 = "d56fbad95abf993f8af608484729e3d87ef611dd85b3380a8bad1d5cbc373a57"
+EIGEN_URL = f"https://gitlab.com/libeigen/eigen/-/archive/{EIGEN_VERSION}/eigen-{EIGEN_VERSION}.tar.gz"
 
-# use cython if we can import it successfully
-try:
-    from Cython.Distutils import build_ext as _build_ext
-except ImportError:
-    use_cython = False
-else:
-    use_cython = True
 
-# wrap the build_ext command to handle numpy bootstrap and compilation errors
-class build_ext(_build_ext):
-    # see http://stackoverflow.com/q/19919905 for explanation
-    def finalize_options(self):
-        _build_ext.finalize_options(self)
-        __builtins__.__NUMPY_SETUP__ = False
-        import numpy as np
-        self.include_dirs.append(np.get_include())
+def ensure_eigen():
+    eigenpath = Path("deps") / "Eigen"
+    if eigenpath.exists():
+        return
+    import hashlib
+    import shutil
+    import tarfile
+    import urllib.request
 
-    # if extension modules fail to build, keep going anyway
-    def run(self):
-        try:
-            _build_ext.run(self)
-        except CompileError:
-            warn('Failed to build extension modules')
-            import traceback
-            print(traceback.format_exc(), file=sys.stderr)
+    deps = Path("deps")
+    deps.mkdir(parents=True, exist_ok=True)
+    eigentarpath = deps / "Eigen.tar.gz"
+    print(f"Eigen headers not found; downloading {EIGEN_URL} ...")
+    req = urllib.request.Request(EIGEN_URL, headers={"User-Agent": "pyhsmm-build/1.0"})
+    data = urllib.request.urlopen(req, timeout=60).read()
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != EIGEN_SHA256:
+        raise RuntimeError(
+            f"Eigen archive checksum mismatch: {digest} != {EIGEN_SHA256}"
+        )
+    eigentarpath.write_bytes(data)
+    with tarfile.open(eigentarpath, "r") as tar:
+        tar.extractall(deps)
+    shutil.move(deps / f"eigen-{EIGEN_VERSION}" / "Eigen", eigenpath)
+    print("...done!")
 
-# wrap the sdist command to try to generate cython sources
-class sdist(_sdist):
-    def run(self):
-        try:
-            from Cython.Build import cythonize
-            cythonize(os.path.join('pyhsmm','**','*.pyx'))
-        except:
-            warn('Failed to generate extension files from Cython sources')
-        finally:
-            _sdist.run(self)
 
-# wrap the clean command to remove object files
-class clean(_clean):
-    def run(self):
-        try:
-            for f in glob(os.path.join('pyhsmm','**','*.so')):  # not recursive before Python 3.5
-                os.remove(f)
-        except:
-            warn('Failed to remove all object files')
-        finally:
-            _clean.run(self)
+ensure_eigen()
 
-# make dependency directory
-if not os.path.exists('deps'):
-    os.mkdir('deps')
+extensions = []
 
-# download Eigen if we don't have it in deps
-eigenurl = 'https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz'
-eigentarpath = os.path.join('deps', 'Eigen.tar.gz')
-eigenpath = os.path.join('deps', 'Eigen')
-if not os.path.exists(eigenpath):
-    print('Downloading Eigen...')
-    r = requests.get(eigenurl)
-    with open(eigentarpath, 'wb') as f:
-        f.write(r.content)
-    with tarfile.open(eigentarpath, 'r') as tar:
-        tar.extractall('deps')
-    thedir = glob(os.path.join('deps', 'eigen-*'))[0]
-    shutil.move(os.path.join(thedir, 'Eigen'), eigenpath)
-    print('...done!')
+for file in Path("pyhsmm").glob("**/*.pyx"):
+    extensions.append(
+        Extension(
+            str(file.with_suffix("")).replace("/", "."),
+            sources=[file],
+            include_dirs=["deps", np.get_include()],
+            extra_compile_args=[
+                "-O3",
+                "-std=c++11",
+                "-DNDEBUG",
+                "-w",
+                "-DHMM_TEMPS_ON_HEAP",
+            ],
+        )
+    )
 
-# make a list of extension modules
-extension_pathspec = os.path.join('pyhsmm','**','*.pyx')  # not recursive before Python 3.5
-paths = [os.path.splitext(fp)[0] for fp in glob(extension_pathspec)]
-names = ['.'.join(os.path.split(p)) for p in paths]
-ext_modules = [
-    Extension(
-        name, sources=[path + '.cpp'],
-        include_dirs=['deps'],
-        extra_compile_args=['-O3','-std=c++11','-DNDEBUG','-w','-DHMM_TEMPS_ON_HEAP'])
-    for name, path in zip(names,paths)]
-
-# if using cython, rebuild the extension files from the .pyx sources
-if use_cython:
-    from Cython.Build import cythonize
-    try:
-        ext_modules = cythonize(extension_pathspec)
-    except:
-        warn('Failed to generate extension module code from Cython files')
-
-# put it all together with a call to setup()
-setup(name='pyhsmm',
-      version='0.1.6',
-      description="Bayesian inference in HSMMs and HMMs",
-      author='Matthew James Johnson',
-      author_email='mattjj@csail.mit.edu',
-      url="https://github.com/mattjj/pyhsmm",
-      license='MIT',
-      packages=['pyhsmm', 'pyhsmm.basic', 'pyhsmm.internals', 'pyhsmm.util'],
-      platforms='ALL',
-      keywords=['bayesian', 'inference', 'mcmc', 'time-series', 'monte-carlo',
-                'variational inference', 'mean field', 'vb'],
-      install_requires=[
-          "numpy", "scipy", "matplotlib", "nose", "pybasicbayes >= 0.1.3", "future", "six"],
-      setup_requires=['numpy', "future", "six"],
-      ext_modules=ext_modules,
-      classifiers=[
-          'Development Status :: 4 - Beta',
-          'Intended Audience :: Science/Research',
-          'Programming Language :: Python',
-          'Programming Language :: C++'],
-      cmdclass={'build_ext': build_ext, 'sdist': sdist, 'clean': clean})
+setuptools.setup(
+    ext_modules=cythonize(
+        extensions,
+        compiler_directives={
+            "language_level": 3,
+            "boundscheck": False,
+            "wraparound": False,
+            "cdivision": True,
+        },
+    ),
+)
